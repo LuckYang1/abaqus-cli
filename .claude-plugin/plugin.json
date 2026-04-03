@@ -1,0 +1,31 @@
+{
+  "name": "abaqus-cli",
+  "version": "1.0.0",
+  "description": "Abaqus FEA CLI 封装插件，使 AI Agent 能自主完成仿真工作流（作业提交、监控、后处理、子程序编译、文件翻译、联合仿真）",
+  "author": {
+    "name": "guide-of-abaqus"
+  },
+  "keywords": ["abaqus", "fea", "simulation", "cli"],
+  "settings": {
+    "abaqus_cmd": {
+      "type": "string",
+      "default": "abaqus",
+      "description": "Abaqus 可执行命令名（如 abaqus, abq2024, abq2025）"
+    },
+    "default_cpus": {
+      "type": "integer",
+      "default": 4,
+      "description": "默认 CPU 核心数"
+    },
+    "default_scratch": {
+      "type": "string",
+      "default": "",
+      "description": "默认临时目录路径"
+    },
+    "default_memory": {
+      "type": "string",
+      "default": "8gb",
+      "description": "默认内存限制"
+    }
+  }
+}
