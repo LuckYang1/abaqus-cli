@@ -11,9 +11,10 @@ description: 编译 Abaqus 用户子程序（Fortran/C/C++）
 
 用户提供子程序源文件。你需要：
 
-1. 调用 `abaqus make` 编译子程序
-2. 支持 standard（默认）、explicit、cfd 求解器类型
-3. 编译结果生成 `.obj` 或 `.so` 文件
+1. **环境预检查**：先运行 `python scripts/version_resolver.py --detect` 确认 Abaqus 可用，检查 Fortran 编译器是否可用
+2. 调用 `abaqus make` 编译子程序
+3. 支持 standard（默认）、explicit、cfd 求解器类型
+4. 编译结果生成 `.obj` 或 `.so` 文件
 
 ## 编译流程
 

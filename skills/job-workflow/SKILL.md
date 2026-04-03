@@ -18,28 +18,30 @@ description: 完整的 Abaqus 仿真工作流 skill — 从输入文件到结果
 ### 第 1 步: 环境检查
 
 1. 使用 `scripts/version_resolver.py --detect` 检测可用的 Abaqus 命令
-2. 如果用户指定了版本，使用 `--resolve <version>` 解析
-3. 确认 .inp 文件存在
+2. 如果用户指定了版本，使用 `--resolve-and-validate <version>` 解析并验证
+3. **如果检测失败（未找到命令），停止流程**，提示用户安装 Abaqus 或使用 `--abaqus-cmd` 指定路径
+4. 确认 .inp 文件存在
+5. 记录检测到的命令名，后续所有步骤使用 `--abaqus-cmd=<cmd>` 传递
 
 ### 第 2 步: 子程序编译（如有）
 
 如果用户提供了子程序文件：
 ```bash
-python scripts/abaqus_runner.py make fortran=<sub_file>
+python scripts/abaqus_runner.py make fortran=<sub_file> --abaqus-cmd=<detected_cmd>
 ```
 检查编译是否成功。失败则报告编译器错误并停止。
 
 ### 第 3 步: 数据检查
 
 ```bash
-python scripts/abaqus_runner.py datacheck job=<name> user=<subroutine>
+python scripts/abaqus_runner.py datacheck job=<name> user=<subroutine> --abaqus-cmd=<detected_cmd>
 ```
 检查 .dat 文件中的错误。datacheck 失败则报告并停止。
 
 ### 第 4 步: 提交分析
 
 ```bash
-python scripts/abaqus_runner.py job=<name> cpus=<n> memory=<mem> user=<subroutine> background
+python scripts/abaqus_runner.py job=<name> cpus=<n> memory=<mem> user=<subroutine> background --abaqus-cmd=<detected_cmd>
 ```
 
 ### 第 5 步: 监控进度
@@ -53,8 +55,8 @@ python scripts/job_monitor.py <name> --watch --interval 30
 
 如果分析完成：
 ```bash
-python scripts/odb_extractor.py extract <name>.odb --field S --step Step-1
-python scripts/odb_extractor.py extract <name>.odb --field U --step Step-1
+python scripts/odb_extractor.py extract <name>.odb --field S --step Step-1 --abaqus-cmd=<detected_cmd>
+python scripts/odb_extractor.py extract <name>.odb --field U --step Step-1 --abaqus-cmd=<detected_cmd>
 ```
 提取应力 (S) 和位移 (U) 到 CSV 文件。
 

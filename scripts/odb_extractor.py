@@ -46,6 +46,14 @@ odb.close()
 """
 
 
+def _cmd_not_found(abaqus_cmd: str, cmd: list[str]) -> subprocess.CompletedProcess:
+    """返回命令未找到的标准错误结果。"""
+    return subprocess.CompletedProcess(
+        args=cmd, returncode=127,
+        stdout="", stderr=f"命令 '{abaqus_cmd}' 未找到。请确认 Abaqus 已安装且在 PATH 中。",
+    )
+
+
 def run_odbreport(
     odb_path: str,
     output: Optional[str] = None,
@@ -59,7 +67,15 @@ def run_odbreport(
     if output:
         cmd.append(f"results={output}")
 
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    except FileNotFoundError:
+        return _cmd_not_found(abaqus_cmd, cmd)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(
+            args=cmd, returncode=124,
+            stdout="", stderr="命令执行超时 (300s)",
+        )
 
 
 def extract_field_output(
@@ -95,12 +111,19 @@ def extract_field_output(
         script_path = tmp.name
 
     try:
-        result = subprocess.run(
-            [abaqus_cmd, "python", script_path],
-            capture_output=True,
-            text=True,
-            timeout=600,
-        )
+        try:
+            result = subprocess.run(
+                [abaqus_cmd, "python", script_path],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
+        except FileNotFoundError:
+            print(f"错误: 命令 '{abaqus_cmd}' 未找到。请确认 Abaqus 已安装且在 PATH 中。", file=sys.stderr)
+            return ""
+        except subprocess.TimeoutExpired:
+            print("错误: 命令执行超时 (600s)", file=sys.stderr)
+            return ""
         if result.returncode == 0:
             print(f"数据已提取到: {output_file}")
         else:
@@ -123,7 +146,15 @@ def run_odb2sim(
     if output:
         cmd.append(f"output={output}")
 
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    except FileNotFoundError:
+        return _cmd_not_found(abaqus_cmd, cmd)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(
+            args=cmd, returncode=124,
+            stdout="", stderr="命令执行超时 (300s)",
+        )
 
 
 def run_restartjoin(
@@ -136,7 +167,15 @@ def run_restartjoin(
     for inp in input_files:
         cmd.append(f"input={inp}")
 
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    except FileNotFoundError:
+        return _cmd_not_found(abaqus_cmd, cmd)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(
+            args=cmd, returncode=124,
+            stdout="", stderr="命令执行超时 (600s)",
+        )
 
 
 def main():

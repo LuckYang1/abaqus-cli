@@ -31,13 +31,18 @@ capabilities:
 
 #### 1. 预检阶段
 ```bash
+# 先验证 Abaqus 命令可用
+python scripts/version_resolver.py --detect
+# 如用户指定版本: python scripts/version_resolver.py --resolve-and-validate 2024
+# 若返回"未找到"，提示用户安装 Abaqus 或使用 --abaqus-cmd 指定路径，然后停止
+
 python scripts/abaqus_runner.py datacheck job=<name> user=<subroutine> cpus=<n>
 ```
 检查 .dat 文件中的错误信息。如果 datacheck 失败，报告错误并停止。
 
 #### 2. 提交阶段
 ```bash
-python scripts/abaqus_runner.py job=<name> cpus=<n> memory=<mem> user=<subroutine>
+python scripts/abaqus_runner.py job=<name> cpus=<n> memory=<mem> user=<subroutine> --abaqus-cmd=<detected_cmd>
 ```
 对于长时间运行的作业，使用 `background` 参数在后台运行。
 
@@ -60,11 +65,14 @@ python scripts/job_monitor.py <job_name> --dir <work_dir>
 
 ## 版本处理
 
-如果用户指定了 Abaqus 版本（如 `2024`），使用 `version_resolver.py` 解析：
+如果用户指定了 Abaqus 版本（如 `2024`），使用 `version_resolver.py` 解析并验证：
 ```bash
-python scripts/version_resolver.py --resolve 2024
-# 输出: abq2024 (可用: 是)
+python scripts/version_resolver.py --resolve-and-validate 2024
+# 输出: abq2024 (成功)
+# 或: 错误: 无法找到可用的 Abaqus 命令 (退出码 1)
 ```
+
+**关键**：如果版本验证失败（退出码 1），必须停止流程并告知用户。不要继续执行任何 abaqus 命令。
 
 ## 输出格式
 

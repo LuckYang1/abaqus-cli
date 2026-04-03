@@ -278,22 +278,38 @@ def execute_command(
     background: bool = False,
 ) -> subprocess.CompletedProcess:
     """执行构建好的命令。"""
-    if background:
-        proc = subprocess.Popen(
+    abaqus_cmd = cmd[0] if cmd else "unknown"
+    try:
+        if background:
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return subprocess.CompletedProcess(
+                args=cmd, returncode=0, stdout="", stderr=""
+            )
+        return subprocess.run(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
+            timeout=timeout,
         )
+    except FileNotFoundError:
+        print(f"错误: 命令 '{abaqus_cmd}' 未找到。", file=sys.stderr)
+        print(f"请确认 Abaqus 已安装且 '{abaqus_cmd}' 在 PATH 中。", file=sys.stderr)
+        print("可使用 --abaqus-cmd 指定正确的命令名，或运行 version_resolver.py --detect 自动检测。", file=sys.stderr)
         return subprocess.CompletedProcess(
-            args=cmd, returncode=0, stdout="", stderr=""
+            args=cmd, returncode=127,
+            stdout="", stderr=f"命令 '{abaqus_cmd}' 未找到",
         )
-    return subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-    )
+    except subprocess.TimeoutExpired:
+        print(f"错误: 命令执行超时 ({timeout}s)", file=sys.stderr)
+        return subprocess.CompletedProcess(
+            args=cmd, returncode=124,
+            stdout="", stderr=f"命令执行超时 ({timeout}s)",
+        )
 
 
 def main():

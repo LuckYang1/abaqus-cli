@@ -11,9 +11,10 @@ description: 提交 Abaqus 分析作业，支持 datacheck、continue、recover 
 
 用户会提供一个 `.inp` 文件和可选参数。你需要：
 
-1. 调用 `scripts/abaqus_runner.py` 构建并执行命令
-2. 支持的子命令：`job`（默认）、`datacheck`、`continue`、`recover`、`syntaxcheck`
-3. 版本切换：如果用户指定版本号（如 `2024`），使用 `scripts/version_resolver.py` 解析
+1. **环境预检查**：先运行 `python scripts/version_resolver.py --detect` 确认 Abaqus 可用。若未检测到，提示用户安装或使用 `--abaqus-cmd` 指定路径
+2. 调用 `scripts/abaqus_runner.py` 构建并执行命令
+3. 支持的子命令：`job`（默认）、`datacheck`、`continue`、`recover`、`syntaxcheck`
+4. 版本切换：如果用户指定版本号（如 `2024`），使用 `scripts/version_resolver.py --resolve-and-validate 2024` 解析并验证
 
 ## 常用参数
 
@@ -33,10 +34,11 @@ description: 提交 Abaqus 分析作业，支持 datacheck、continue、recover 
 ```
 用户: /abaqus-run model.inp cpus=8 memory=16gb
 
-1. 解析参数: job=model, cpus=8, memory=16gb
-2. 构建命令: abaqus job=model cpus=8 memory=16gb
-3. 执行并返回结果
-4. 如果作业非交互式提交，提示使用 /abaqus-monitor 监控
+1. 环境检查: version_resolver.py --detect → 确认命令可用
+2. 解析参数: job=model, cpus=8, memory=16gb
+3. 构建命令: abaqus job=model cpus=8 memory=16gb
+4. 执行并返回结果（命令未找到时返回友好错误提示）
+5. 如果作业非交互式提交，提示使用 /abaqus-monitor 监控
 ```
 
 ## Datacheck 模式

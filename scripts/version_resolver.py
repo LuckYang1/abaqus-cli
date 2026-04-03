@@ -59,17 +59,34 @@ def get_version_info(cmd: str = "abaqus") -> str:
         return f"错误: 命令 '{cmd}' 执行超时"
 
 
+def resolve_and_validate(version_str: str) -> str:
+    """解析版本字符串并验证命令可用，返回命令名或空字符串。"""
+    cmd = resolve_command(version_str)
+    if validate_command(cmd):
+        return cmd
+    # 尝试自动检测作为后备
+    return auto_detect()
+
+
 def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Abaqus 版本解析器")
     parser.add_argument("--resolve", help="解析版本字符串为命令名")
+    parser.add_argument("--resolve-and-validate", help="解析版本字符串并验证可用性")
     parser.add_argument("--validate", help="验证命令是否可用")
     parser.add_argument("--detect", action="store_true", help="自动检测可用命令")
     parser.add_argument("--info", nargs="?", const="abaqus", help="获取版本信息")
     args = parser.parse_args()
 
-    if args.resolve:
+    if args.resolve_and_validate:
+        cmd = resolve_and_validate(args.resolve_and_validate)
+        if cmd:
+            print(cmd)
+        else:
+            print(f"错误: 无法找到可用的 Abaqus 命令 (输入: {args.resolve_and_validate})", file=sys.stderr)
+            sys.exit(1)
+    elif args.resolve:
         cmd = resolve_command(args.resolve)
         valid = validate_command(cmd)
         print(f"{cmd} (可用: {'是' if valid else '否'})")

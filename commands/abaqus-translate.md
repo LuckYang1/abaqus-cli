@@ -11,8 +11,9 @@ description: Abaqus 与其他求解器之间的文件格式转换
 
 用户提供源文件和目标格式。你需要：
 
-1. 调用 `scripts/abaqus_runner.py` 的 translate 类命令
-2. 支持双向转换：导出到其他格式 / 从其他格式导入
+1. **环境预检查**：先运行 `python scripts/version_resolver.py --detect` 确认 Abaqus 可用
+2. 调用 `scripts/abaqus_runner.py` 的 translate 类命令
+3. 支持双向转换：导出到其他格式 / 从其他格式导入
 
 ## 支持的转换方向
 
