@@ -11,7 +11,7 @@
     {
       "name": "abaqus-cli",
       "description": "Abaqus FEA CLI 封装插件，使 AI Agent 能自主完成仿真工作流（作业提交、监控、后处理、子程序编译、文件翻译、联合仿真）",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "author": { "name": "LuckYang1" },
       "source": "./",
       "category": "simulation",
